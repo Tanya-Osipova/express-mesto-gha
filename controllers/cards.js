@@ -44,7 +44,12 @@ module.exports.likeCard = (req, res) => Card.findByIdAndUpdate(
   { $addToSet: { likes: req.user._id } },
   { new: true },
 )
-  .then()
+  .then((card) => {
+    if (card === null) {
+      return res.status(DOCUMENT_NOT_FOUND_ERROR).send({ message: 'Передан несуществующий _id карточки.' });
+    }
+    return res.send({ data: card });
+  })
   .catch((err) => {
     if (err.name === 'ValidationError') {
       return res.status(VALIDATION_ERROR).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
