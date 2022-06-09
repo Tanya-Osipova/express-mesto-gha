@@ -14,7 +14,12 @@ module.exports.getUsers = (req, res) => {
 // Read
 module.exports.getUser = (req, res) => {
   User.findById(req.params.userId)
-    .then((user) => res.send({ data: user }))
+    .then((user) => {
+      if (user === null) {
+        return res.status(DOCUMENT_NOT_FOUND_ERROR).send({ message: 'Пользователь по указанному _id не найден.' });
+      }
+      return res.send({ data: user });
+    })
     .catch((err) => {
       if (err.name === 'CastError') {
         return res.status(DOCUMENT_NOT_FOUND_ERROR).send({ message: 'Пользователь по указанному _id не найден.' });
@@ -41,7 +46,11 @@ module.exports.createUser = (req, res) => {
 module.exports.updateUser = (req, res) => {
   User.findByIdAndUpdate(
     req.body._id,
-    { name: req.body.name },
+    {
+      name: req.body.name,
+      about: req.body.about,
+      avatar: req.body.avatar,
+    },
     {
       new: true,
       runValidators: true,
