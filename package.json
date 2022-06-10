@@ -1,7 +1,7 @@
 {
   "name": "mesto-express",
   "version": "1.0.0",
-  "description": "[https://github.com/Tanya-Osipova/express-mesto-gha]",
+  "description": "Create back-end for the project",
   "main": "index.js",
   "scripts": {
     "start": "node app.js",
