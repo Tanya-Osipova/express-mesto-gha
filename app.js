@@ -21,7 +21,7 @@ app.use((req, _res, next) => {
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 
-app.get('*', (_req, res) => {
+app.patch('*', (_req, res) => {
   res.status(404).send({ message: 'Не найдено' });
 });
 

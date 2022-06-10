@@ -39,6 +39,9 @@ module.exports.deleteCard = (req, res) => {
       if (err.name === 'CastError') {
         return res.status(VALIDATION_ERROR).send({ message: 'Пользователь по указанному _id не найден.' });
       }
+      if (err.name === 'ValidationError') {
+        return res.status(VALIDATION_ERROR).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
+      }
       return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка по умолчанию.' });
     });
 };
