@@ -10,7 +10,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
-app.use((req, res, next) => {
+app.use((req, _res, next) => {
   req.user = {
     _id: '629e185dd9b1e64e9655ee89',
   };
@@ -20,6 +20,10 @@ app.use((req, res, next) => {
 
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
+
+app.get('*', (_req, res) => {
+  res.status(404).send({ message: 'Не найдено' });
+});
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);

@@ -5,7 +5,7 @@ const DOCUMENT_NOT_FOUND_ERROR = 404;
 const INTERNAL_SERVER_ERROR = 500;
 
 // Read
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (_req, res) => {
   User.find({})
     .then((users) => res.send({ data: users }))
     .catch(() => res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' }));
@@ -16,13 +16,13 @@ module.exports.getUser = (req, res) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (user === null) {
-        return res.status(VALIDATION_ERROR).send({ message: 'Переданы некорректные данные при создании пользователя.' });
+        return res.status(DOCUMENT_NOT_FOUND_ERROR).send({ message: 'Переданы некорректные данные при создании пользователя.' });
       }
       return res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(DOCUMENT_NOT_FOUND_ERROR).send({ message: 'Пользователь по указанному _id не найден.' });
+        return res.status(VALIDATION_ERROR).send({ message: 'Пользователь по указанному _id не найден.' });
       }
       return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка по умолчанию.' });
     });

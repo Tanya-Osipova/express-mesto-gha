@@ -5,7 +5,7 @@ const DOCUMENT_NOT_FOUND_ERROR = 404;
 const INTERNAL_SERVER_ERROR = 500;
 
 // Read
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (_req, res) => {
   Card.find({})
     .then((cards) => res.send({ data: cards }))
     .catch(() => res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' }));
@@ -29,10 +29,15 @@ module.exports.createCard = (req, res) => {
 // Delete
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.id)
-    .then((card) => res.send({ data: card }))
+    .then((card) => {
+      if (card === null) {
+        return res.status(DOCUMENT_NOT_FOUND_ERROR).send({ message: 'Передан несуществующий _id карточки.' });
+      }
+      return res.send({ data: card });
+    })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(DOCUMENT_NOT_FOUND_ERROR).send({ message: 'Пользователь по указанному _id не найден.' });
+        return res.status(VALIDATION_ERROR).send({ message: 'Пользователь по указанному _id не найден.' });
       }
       return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка по умолчанию.' });
     });
@@ -46,7 +51,7 @@ module.exports.likeCard = (req, res) => Card.findByIdAndUpdate(
 )
   .then((card) => {
     if (card === null) {
-      return res.status(VALIDATION_ERROR).send({ message: 'Передан несуществующий _id карточки.' });
+      return res.status(DOCUMENT_NOT_FOUND_ERROR).send({ message: 'Передан несуществующий _id карточки.' });
     }
     return res.send({ data: card });
   })
@@ -55,7 +60,7 @@ module.exports.likeCard = (req, res) => Card.findByIdAndUpdate(
       return res.status(VALIDATION_ERROR).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
     }
     if (err.name === 'CastError') {
-      return res.status(DOCUMENT_NOT_FOUND_ERROR).send({ message: 'Передан несуществующий _id карточки.' });
+      return res.status(VALIDATION_ERROR).send({ message: 'Передан несуществующий _id карточки.' });
     }
     return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка по умолчанию.' });
   });
@@ -68,7 +73,7 @@ module.exports.dislikeCard = (req, res) => Card.findByIdAndUpdate(
 )
   .then((card) => {
     if (card === null) {
-      return res.status(VALIDATION_ERROR).send({ message: 'Передан несуществующий _id карточки.' });
+      return res.status(DOCUMENT_NOT_FOUND_ERROR).send({ message: 'Передан несуществующий _id карточки.' });
     }
     return res.send({ data: card });
   })
@@ -77,7 +82,7 @@ module.exports.dislikeCard = (req, res) => Card.findByIdAndUpdate(
       return res.status(VALIDATION_ERROR).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
     }
     if (err.name === 'CastError') {
-      return res.status(DOCUMENT_NOT_FOUND_ERROR).send({ message: 'Передан несуществующий _id карточки.' });
+      return res.status(VALIDATION_ERROR).send({ message: 'Передан несуществующий _id карточки.' });
     }
     return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка по умолчанию.' });
   });
