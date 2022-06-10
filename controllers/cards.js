@@ -28,7 +28,7 @@ module.exports.createCard = (req, res) => {
 
 // Delete
 module.exports.deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.id)
+  Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
       if (card === null) {
         return res.status(DOCUMENT_NOT_FOUND_ERROR).send({ message: 'Передан несуществующий _id карточки.' });
@@ -40,7 +40,7 @@ module.exports.deleteCard = (req, res) => {
         return res.status(VALIDATION_ERROR).send({ message: 'Пользователь по указанному _id не найден.' });
       }
       if (err.name === 'ValidationError') {
-        return res.status(VALIDATION_ERROR).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
+        return res.status(VALIDATION_ERROR).send({ message: 'Переданы некорректные данные для удаления.' });
       }
       return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка по умолчанию.' });
     });
