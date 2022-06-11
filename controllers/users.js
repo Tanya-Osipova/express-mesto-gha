@@ -13,7 +13,7 @@ module.exports.getUser = (req, res) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (user === null) {
-        return res.status(DOCUMENT_NOT_FOUND_ERROR).send({ message: 'Пользователь по указанному _id не найден.' });
+        return res.status(DOCUMENT_NOT_FOUND_ERROR).send({ message: 'Пользователь по указанному _id не найден' });
       }
       return res.send({ data: user });
     })
