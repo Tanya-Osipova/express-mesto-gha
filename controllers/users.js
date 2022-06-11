@@ -5,7 +5,7 @@ const { VALIDATION_ERROR, DOCUMENT_NOT_FOUND_ERROR, INTERNAL_SERVER_ERROR } = re
 module.exports.getUsers = (_req, res) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch(() => res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка по умолчанию.' }));
+    .catch(() => res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' }));
 };
 
 // Read
@@ -21,7 +21,7 @@ module.exports.getUser = (req, res) => {
       if (err.name === 'CastError') {
         return res.status(VALIDATION_ERROR).send({ message: `Переданы некорректные данные при создании пользователя: ${err.message}` });
       }
-      return res.status(INTERNAL_SERVER_ERROR).send({ message: `Ошибка по умолчанию: ${err.message}` });
+      return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
     });
 };
 
@@ -35,7 +35,7 @@ module.exports.createUser = (req, res) => {
       if (err.name === 'ValidationError') {
         return res.status(VALIDATION_ERROR).send({ message: `Переданы некорректные данные при создании пользователя: ${err.message}` });
       }
-      return res.status(INTERNAL_SERVER_ERROR).send({ message: `Ошибка по умолчанию: ${err.message}` });
+      return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
     });
 };
 
@@ -62,7 +62,7 @@ module.exports.updateUser = (req, res) => {
       if (err.name === 'CastError') {
         return res.status(DOCUMENT_NOT_FOUND_ERROR).send({ message: `Пользователь по указанному _id не найден:${err.message}` });
       }
-      return res.status(INTERNAL_SERVER_ERROR).send({ message: `Ошибка по умолчанию: ${err.message}` });
+      return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
     });
 };
 
@@ -85,6 +85,6 @@ module.exports.updateUserAvatar = (req, res) => {
       if (err.name === 'CastError') {
         return res.status(DOCUMENT_NOT_FOUND_ERROR).send({ message: `Пользователь по указанному _id не найден: ${err.message}` });
       }
-      return res.status(INTERNAL_SERVER_ERROR).send({ message: `Ошибка по умолчанию: ${err.message}` });
+      return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
     });
 };
