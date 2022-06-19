@@ -37,7 +37,7 @@ module.exports.getUser = (req, res, next) => {
 };
 
 // Create
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     email,
     password,
@@ -65,14 +65,17 @@ module.exports.createUser = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(VALIDATION_ERROR).send({ message: `Переданы некорректные данные при создании пользователя: ${err.message}` });
+        throw new ValidationError(err.message);
       }
-      return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
-    });
+      if (err.code === 11000) {
+        throw new ConflictError('Такой пользователь уже зарегистрирован!');
+      }
+    })
+    .catch(next);
 };
 
 // Update user
-module.exports.updateUser = (req, res) => {
+module.exports.updateUser = (req, res, next) => {
   User.findByIdAndUpdate(
     req.body._id,
     {
@@ -89,18 +92,17 @@ module.exports.updateUser = (req, res) => {
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(VALIDATION_ERROR).send({ message: `Переданы некорректные данные при обновлении профиля: ${err.message}` });
+        throw new ValidationError(err.message);
       }
       if (err.name === 'CastError') {
-        //throw new NotFoundError('Нет пользователя с таким id');
-        return res.status(DOCUMENT_NOT_FOUND_ERROR).send({ message: `Пользователь по указанному _id не найден:${err.message}` });
+        throw new NotFoundError('Нет пользователя с таким id');
       }
-      return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
-    });
+    })
+    .catch(next);
 };
 
 // Update avatar
-module.exports.updateUserAvatar = (req, res) => {
+module.exports.updateUserAvatar = (req, res, next) => {
   User.findByIdAndUpdate(
     req.body._id,
     { avatar: req.body.avatar },
@@ -113,18 +115,17 @@ module.exports.updateUserAvatar = (req, res) => {
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(VALIDATION_ERROR).send({ message: `Переданы некорректные данные при обновлении аватара: ${err.message}` });
+        throw new ValidationError(err.message);
       }
       if (err.name === 'CastError') {
-        //throw new NotFoundError('Нет пользователя с таким id');
-        return res.status(DOCUMENT_NOT_FOUND_ERROR).send({ message: `Пользователь по указанному _id не найден: ${err.message}` });
+        throw new NotFoundError('Нет пользователя с таким id');
       }
-      return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
-    });
+    })
+    .catch(next);
 };
 
 // Login
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
@@ -137,7 +138,6 @@ module.exports.login = (req, res) => {
 
       res.send({ token });
     })
-    .catch((err) => {
-      res.status(401).send({ message: err.message });
-    });
+    .catch((err) => new AnauthorizedError(err.message))
+    .catch(next);
 };
