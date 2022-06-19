@@ -1,5 +1,10 @@
 const Card = require('../models/card');
-const { VALIDATION_ERROR, DOCUMENT_NOT_FOUND_ERROR, INTERNAL_SERVER_ERROR } = require('../utils/constants');
+const NotFoundError = require('../errors/not-found-error');
+const ConflictError = require('../errors/conflict-error');
+const ServerError = require('../errors/server-error');
+const AnauthorizedError = require('../errors/unauthorized-error');
+const ValidationError = require('../errors/validation-error');
+//const { VALIDATION_ERROR, DOCUMENT_NOT_FOUND_ERROR, INTERNAL_SERVER_ERROR } = require('../utils/constants');
 
 // Read
 module.exports.getCards = (_req, res) => {
@@ -25,9 +30,9 @@ module.exports.createCard = (req, res) => {
 
 // Delete
 module.exports.deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.cardId)
+  Card.findOneAndRemove({ _id: req.params.cardId, owner: req.user._id })
     .then((card) => {
-      if (card === null) {
+      if (!card) {
         return res.status(DOCUMENT_NOT_FOUND_ERROR).send({ message: 'Передан несуществующий _id карточки.' });
       }
       return res.send({ data: card });

@@ -1,6 +1,10 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const auth = require('./middlewares/auth');
+const errors = require('./middlewares/error');
+
+const { createUser, login } = require('./controllers/users');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -10,13 +14,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
-app.use((req, _res, next) => {
-  req.user = {
-    _id: '629e185dd9b1e64e9655ee89',
-  };
+app.post('/signup', createUser);
+app.post('/signin', login);
 
-  next();
-});
+app.use(auth);
 
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
@@ -24,6 +25,7 @@ app.use('/cards', require('./routes/cards'));
 app.patch('*', (_req, res) => {
   res.status(404).send({ message: 'Не найдено' });
 });
+app.use(errors);
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
