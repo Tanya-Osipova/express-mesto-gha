@@ -4,7 +4,6 @@ const User = require('../models/user');
 const { NotFoundError } = require('../errors/not-found-error');
 const { ConflictError } = require('../errors/conflict-error');
 const { ServerError } = require('../errors/server-error');
-const { UnauthorizedError } = require('../errors/unauthorized-error');
 const { ValidationError } = require('../errors/validation-error');
 // Read
 module.exports.getUsers = (_req, res, next) => {
@@ -138,6 +137,5 @@ module.exports.login = (req, res, next) => {
 
       res.send({ token });
     })
-    .catch((err) => new UnauthorizedError(err.message))
     .catch(next);
 };
