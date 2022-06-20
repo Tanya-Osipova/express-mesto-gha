@@ -1,11 +1,11 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const NotFoundError = require('../errors/not-found-error');
-const ConflictError = require('../errors/conflict-error');
-const ServerError = require('../errors/server-error');
-const AnauthorizedError = require('../errors/unauthorized-error');
-const ValidationError = require('../errors/validation-error');
+const { NotFoundError } = require('../errors/not-found-error');
+const { ConflictError } = require('../errors/conflict-error');
+const { ServerError } = require('../errors/server-error');
+const { UnauthorizedError } = require('../errors/unauthorized-error');
+const { ValidationError } = require('../errors/validation-error');
 // Read
 module.exports.getUsers = (_req, res, next) => {
   User.find({})
@@ -138,6 +138,6 @@ module.exports.login = (req, res, next) => {
 
       res.send({ token });
     })
-    .catch((err) => new AnauthorizedError(err.message))
+    .catch((err) => new UnauthorizedError(err.message))
     .catch(next);
 };

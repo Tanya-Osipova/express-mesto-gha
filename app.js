@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { celebrate, Joi, errors } = require('celebrate');
-const NotFoundError = require('./errors/not-found-error');
+const { NotFoundError } = require('./errors/not-found-error');
 const auth = require('./middlewares/auth');
 const error = require('./middlewares/error');
 
