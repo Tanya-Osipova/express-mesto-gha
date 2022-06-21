@@ -60,6 +60,14 @@ module.exports.createUser = (req, res, next) => {
     avatar,
   } = req.body;
 
+  User.findOne({ email })
+    .then((user) => {
+      if (user) {
+        throw new ConflictError('Такой пользователь уже зарегистрирован!');
+      }
+    })
+    .catch(next);
+
   bcrypt.hash(password, 10)
     .then((hash) => User.create({
       email,
