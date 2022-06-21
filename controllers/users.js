@@ -19,8 +19,23 @@ module.exports.getUsers = (_req, res, next) => {
 
 // Read
 module.exports.getUser = (req, res, next) => {
-  if (req.params.userId === 'me') { req.params.userId = req.user._id; }
   User.findById(req.params.userId)
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Нет пользователя с таким id');
+      }
+      return res.send({ data: user });
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        throw new ValidationError(err.message);
+      }
+    })
+    .catch(next);
+};
+
+module.exports.getMe = (req, res, next) => {
+  User.findById(req.user._id)
     .then((user) => {
       if (!user) {
         throw new NotFoundError('Нет пользователя с таким id');
