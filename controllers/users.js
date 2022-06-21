@@ -46,8 +46,8 @@ module.exports.getMe = (req, res, next) => {
       if (err.name === 'CastError') {
         throw new ValidationError(err.message);
       }
-    })
-    .catch(next);
+      next();
+    });
 };
 
 // Create
@@ -84,8 +84,8 @@ module.exports.createUser = (req, res, next) => {
       if (err.code === 11000) {
         throw new ConflictError('Такой пользователь уже зарегистрирован!');
       }
-    })
-    .catch(next);
+      next();
+    });
 };
 
 // Update user

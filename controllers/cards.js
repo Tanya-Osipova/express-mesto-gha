@@ -20,8 +20,8 @@ module.exports.createCard = (req, res, next) => {
       if (err.name === 'ValidationError') {
         throw new ValidationError(err.message);
       }
-    })
-    .catch(next);
+      next();
+    });
 };
 
 // Delete
@@ -37,8 +37,8 @@ module.exports.deleteCard = (req, res, next) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
         throw new ValidationError(err.message);
       }
-    })
-    .catch(next);
+      next();
+    });
 };
 
 // Like: PUT
@@ -48,17 +48,17 @@ module.exports.likeCard = (req, res, next) => Card.findByIdAndUpdate(
   { new: true },
 )
   .then((card) => {
-    if (card === null) {
+    if (!card) {
       throw new NotFoundError('Передан несуществующий id карточки');
     }
     return res.send({ data: card });
   })
   .catch((err) => {
     if (err.name === 'ValidationError' || err.name === 'CastError') {
-      throw new ValidationError(err.message);
+      throw new ValidationError('Нет такой карты');
     }
-  })
-  .catch(next);
+    next();
+  });
 
 // Dislike: DELETE
 module.exports.dislikeCard = (req, res, next) => Card.findByIdAndUpdate(
@@ -76,5 +76,5 @@ module.exports.dislikeCard = (req, res, next) => Card.findByIdAndUpdate(
     if (err.name === 'ValidationError' || err.name === 'CastError') {
       throw new ValidationError(err.message);
     }
-  })
-  .catch(next);
+    next();
+  });
