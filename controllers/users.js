@@ -30,8 +30,8 @@ module.exports.getUser = (req, res, next) => {
       if (err.name === 'CastError') {
         throw new ValidationError(err.message);
       }
-    })
-    .catch(next);
+      next();
+    });
 };
 
 module.exports.getMe = (req, res, next) => {
