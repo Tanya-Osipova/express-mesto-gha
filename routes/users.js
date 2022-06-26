@@ -19,6 +19,10 @@ router.patch('/me', celebrate({
     avatar: Joi.string().pattern(/^https?:\/\/(www\.)?[a-zA-Z0-9-]+\.\w{2,}\/?\S*#?$/),
   }).unknown(true),
 }), updateUser);
-router.patch('/me/avatar', updateUserAvatar);
+router.patch('/me/avatar', celebrate({
+  body: Joi.object().keys({
+    avatar: Joi.string().pattern(/^https?:\/\/(www\.)?[a-zA-Z0-9-]+\.\w{2,}\/?\S*#?$/),
+  }),
+}), updateUserAvatar);
 
 module.exports = router;

@@ -24,11 +24,10 @@ const cardSchema = new mongoose.Schema({
     required: [true, 'Пользователь с таким _id не найден'],
   },
   likes: {
-    type: {
+    type: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'user',
-    },
-    default: [],
+    }],
   },
   createdAt: {
     type: Date,
