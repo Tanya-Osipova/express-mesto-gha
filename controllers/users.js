@@ -3,17 +3,12 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const { NotFoundError } = require('../errors/not-found-error');
 const { ConflictError } = require('../errors/conflict-error');
-const { ServerError } = require('../errors/server-error');
 const { ValidationError } = require('../errors/validation-error');
+
 // Read
 module.exports.getUsers = (_req, res, next) => {
   User.find({})
-    .then((users) => {
-      if (!users) {
-        throw new ServerError('Произошла ошибка');
-      }
-      res.send({ data: users });
-    })
+    .then((users) => res.send({ data: users }))
     .catch(next);
 };
 
@@ -22,15 +17,16 @@ module.exports.getUser = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('Нет пользователя с таким id');
+        next(new NotFoundError('Нет пользователя с таким id'));
       }
       return res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new ValidationError(err.message);
+        next(new ValidationError(err.message));
+      } else {
+        next(err);
       }
-      next();
     });
 };
 
@@ -38,15 +34,16 @@ module.exports.getMe = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('Нет пользователя с таким id');
+        next(new NotFoundError('Нет пользователя с таким id'));
       }
       return res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new ValidationError(err.message);
+        next(new ValidationError(err.message));
+      } else {
+        next(err);
       }
-      next();
     });
 };
 
@@ -63,43 +60,34 @@ module.exports.createUser = (req, res, next) => {
   User.findOne({ email })
     .then((user) => {
       if (user) {
-        throw new ConflictError('Такой пользователь уже зарегистрирован!');
+        next(new ConflictError('Такой пользователь уже зарегистрирован!'));
       }
-    })
-    .catch(next);
-
-  bcrypt.hash(password, 10)
-    .then((hash) => User.create({
-      email,
-      password: hash,
-      name,
-      about,
-      avatar,
-    }))
-    .then((user) => {
-      res.status(201).send({
-        _id: user._id,
-        email: user.email,
-        name: user.name,
-        about: user.about,
-        avatar: user.avatar,
-      });
+      bcrypt.hash(password, 10)
+        .then((hash) => User.create({
+          email,
+          password: hash,
+          name,
+          about,
+          avatar,
+        }))
+        .then((newUser) => res.status(201).send(newUser));
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new ValidationError(err.message);
+        next(new ValidationError(err.message));
       }
       if (err.code === 11000) {
-        throw new ConflictError('Такой пользователь уже зарегистрирован!');
+        next(new ConflictError('Такой пользователь уже зарегистрирован!'));
+      } else {
+        next(err);
       }
-      next();
     });
 };
 
 // Update user
 module.exports.updateUser = (req, res, next) => {
   User.findByIdAndUpdate(
-    req.body._id,
+    req.user._id,
     {
       name: req.body.name,
       about: req.body.about,
@@ -108,42 +96,50 @@ module.exports.updateUser = (req, res, next) => {
     {
       new: true,
       runValidators: true,
-      upsert: true,
     },
   )
-    .then((user) => res.send({ data: user }))
+    .then((user) => {
+      if (!user) {
+        next(new NotFoundError('Нет пользователя с таким id'));
+      }
+      return res.send({ data: user });
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new ValidationError(err.message);
+        next(new ValidationError(err.message));
       }
       if (err.name === 'CastError') {
-        throw new NotFoundError('Нет пользователя с таким id');
+        next(new NotFoundError('Нет пользователя с таким id'));
       }
-    })
-    .catch(next);
+      next(err);
+    });
 };
 
 // Update avatar
 module.exports.updateUserAvatar = (req, res, next) => {
   User.findByIdAndUpdate(
-    req.body._id,
+    req.user._id,
     { avatar: req.body.avatar },
     {
       new: true,
       runValidators: true,
-      upsert: true,
     },
   )
-    .then((user) => res.send({ data: user }))
+    .then((user) => {
+      if (!user) {
+        next(new NotFoundError('Нет пользователя с таким id'));
+      }
+      return res.send({ data: user });
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new ValidationError(err.message);
+        next(new ValidationError(err.message));
       }
       if (err.name === 'CastError') {
-        throw new NotFoundError('Нет пользователя с таким id');
+        next(new NotFoundError('Нет пользователя с таким id'));
       }
-    })
-    .catch(next);
+      next(err);
+    });
 };
 
 // Login

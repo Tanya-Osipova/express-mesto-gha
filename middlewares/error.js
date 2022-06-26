@@ -1,5 +1,5 @@
 module.exports = (err, _req, res, next) => {
-  const { statusCode = 400, message } = err;
+  const { statusCode = 500, message } = err;
   res
     .status(statusCode)
     .send({

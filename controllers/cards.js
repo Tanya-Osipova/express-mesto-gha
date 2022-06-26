@@ -16,12 +16,13 @@ module.exports.createCard = (req, res, next) => {
   const owner = req.user._id;
 
   Card.create({ name, link, owner })
-    .then((card) => res.send({ data: card }))
+    .then((card) => res.status(201).send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new ValidationError(err.message);
+        next(new ValidationError(err.message));
+      } else {
+        next(err);
       }
-      next();
     });
 };
 
@@ -30,21 +31,21 @@ module.exports.deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('Передан несуществующий id карточки');
+        next(new NotFoundError('Передан несуществующий id карточки'));
       }
       if (card.owner.toString() !== req.user._id) {
-        throw new ForbiddenError('Запрещено');
+        next(new ForbiddenError('Запрещено'));
       }
-      Card.findOneAndRemove({ _id: req.params.cardId, owner: req.user._id })
-        .then(() => res.send({ data: card }))
-        .catch((err) => {
-          if (err.name === 'CastError' || err.name === 'ValidationError') {
-            throw new ValidationError(err.message);
-          }
-          next();
-        });
+      card.remove();
     })
-    .catch(next);
+    .then((card) => res.send({ data: card }))
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new ValidationError(err.message));
+      } else {
+        next(err);
+      }
+    });
 };
 // Like: PUT
 module.exports.likeCard = (req, res, next) => Card.findByIdAndUpdate(
@@ -54,15 +55,16 @@ module.exports.likeCard = (req, res, next) => Card.findByIdAndUpdate(
 )
   .then((card) => {
     if (!card) {
-      throw new NotFoundError('Передан несуществующий id карточки');
+      next(new NotFoundError('Передан несуществующий id карточки'));
     }
     return res.send({ data: card });
   })
   .catch((err) => {
-    if (err.name === 'ValidationError' || err.name === 'CastError') {
-      throw new ValidationError('Нет такой карты');
+    if (err.name === 'CastError') {
+      next(new ValidationError('Нет такой карты'));
+    } else {
+      next(err);
     }
-    next();
   });
 
 // Dislike: DELETE
@@ -72,14 +74,15 @@ module.exports.dislikeCard = (req, res, next) => Card.findByIdAndUpdate(
   { new: true },
 )
   .then((card) => {
-    if (card === null) {
-      throw new NotFoundError('Передан несуществующий id карточки');
+    if (!card) {
+      next(new NotFoundError('Передан несуществующий id карточки'));
     }
     return res.send({ data: card });
   })
   .catch((err) => {
-    if (err.name === 'ValidationError' || err.name === 'CastError') {
-      throw new ValidationError(err.message);
+    if (err.name === 'CastError') {
+      next(new ValidationError(err.message));
+    } else {
+      next(err);
     }
-    next();
   });

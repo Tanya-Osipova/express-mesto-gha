@@ -33,6 +33,13 @@ const userSchema = new mongoose.Schema({
   },
   avatar: {
     type: String,
+    validate: {
+      validator: (v) => {
+        const regex = /^https?:\/\/(www\.)?[a-zA-Z0-9-]+\.\w{2,}\/?\S*#?$/;
+        return v.match(regex);
+      },
+      message: 'Неправильный формат ссылки',
+    },
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
   },
 });
@@ -56,5 +63,13 @@ userSchema.statics.findUserByCredentials = function (email, password) {
         });
     });
 };
+
+userSchema.set('toJSON', {
+  transform(_doc, ret) {
+    // eslint-disable-next-line no-param-reassign
+    delete ret.password;
+    return ret;
+  },
+});
 
 module.exports = mongoose.model('user', userSchema);
