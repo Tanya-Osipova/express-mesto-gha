@@ -1,5 +1,5 @@
 const Card = require('../models/card');
-const NotFoundError = require('../errors/not-found-error');
+const { NotFoundError } = require('../errors/not-found-error');
 const { ValidationError } = require('../errors/validation-error');
 const { ForbiddenError } = require('../errors/forbidden-error');
 
@@ -32,27 +32,20 @@ module.exports.deleteCard = (req, res, next) => {
       if (!card) {
         throw new NotFoundError('Передан несуществующий id карточки');
       }
-      if (card.owner !== req.user._id) {
+      if (card.owner.toString() !== req.user._id) {
         throw new ForbiddenError('Запрещено');
       }
+      Card.findOneAndRemove({ _id: req.params.cardId, owner: req.user._id })
+        .then(() => res.send({ data: card }))
+        .catch((err) => {
+          if (err.name === 'CastError' || err.name === 'ValidationError') {
+            throw new ValidationError(err.message);
+          }
+          next();
+        });
     })
     .catch(next);
-
-  Card.findOneAndRemove({ _id: req.params.cardId, owner: req.user._id })
-    .then((card) => {
-      if (!card) {
-        throw new NotFoundError('Передан несуществующий id карточки');
-      }
-      return res.send({ data: card });
-    })
-    .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
-        throw new ValidationError(err.message);
-      }
-      next();
-    });
 };
-
 // Like: PUT
 module.exports.likeCard = (req, res, next) => Card.findByIdAndUpdate(
   req.params.cardId,
