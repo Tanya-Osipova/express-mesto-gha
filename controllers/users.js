@@ -17,7 +17,7 @@ module.exports.getUser = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
-        next(new NotFoundError('Нет пользователя с таким id'));
+        throw new NotFoundError('Нет пользователя с таким id');
       }
       return res.send({ data: user });
     })
@@ -34,7 +34,7 @@ module.exports.getMe = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
       if (!user) {
-        next(new NotFoundError('Нет пользователя с таким id'));
+        throw new NotFoundError('Нет пользователя с таким id');
       }
       return res.send({ data: user });
     })
@@ -60,7 +60,7 @@ module.exports.createUser = (req, res, next) => {
   User.findOne({ email })
     .then((user) => {
       if (user) {
-        next(new ConflictError('Такой пользователь уже зарегистрирован!'));
+        throw new ConflictError('Такой пользователь уже зарегистрирован!');
       }
       bcrypt.hash(password, 10)
         .then((hash) => User.create({
@@ -75,8 +75,7 @@ module.exports.createUser = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new ValidationError(err.message));
-      }
-      if (err.code === 11000) {
+      } else if (err.code === 11000) {
         next(new ConflictError('Такой пользователь уже зарегистрирован!'));
       } else {
         next(err);
@@ -100,18 +99,18 @@ module.exports.updateUser = (req, res, next) => {
   )
     .then((user) => {
       if (!user) {
-        next(new NotFoundError('Нет пользователя с таким id'));
+        throw new NotFoundError('Нет пользователя с таким id');
       }
       return res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new ValidationError(err.message));
+      } else if (err.name === 'CastError') {
+        next(new NotFoundError('Неправильный id'));
+      } else {
+        next(err);
       }
-      if (err.name === 'CastError') {
-        next(new NotFoundError('Нет пользователя с таким id'));
-      }
-      next(err);
     });
 };
 
@@ -127,18 +126,18 @@ module.exports.updateUserAvatar = (req, res, next) => {
   )
     .then((user) => {
       if (!user) {
-        next(new NotFoundError('Нет пользователя с таким id'));
+        throw new NotFoundError('Нет пользователя с таким id');
       }
       return res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new ValidationError(err.message));
+      } else if (err.name === 'CastError') {
+        next(new NotFoundError('Неправильный id'));
+      } else {
+        next(err);
       }
-      if (err.name === 'CastError') {
-        next(new NotFoundError('Нет пользователя с таким id'));
-      }
-      next(err);
     });
 };
 

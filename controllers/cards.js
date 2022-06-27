@@ -31,12 +31,12 @@ module.exports.deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
-        next(new NotFoundError('Передан несуществующий id карточки'));
+        throw new NotFoundError('Передан несуществующий id карточки');
       }
       if (card.owner.toString() !== req.user._id) {
-        next(new ForbiddenError('Запрещено'));
+        throw new ForbiddenError('Запрещено');
       }
-      card.remove();
+      return card.remove();
     })
     .then((card) => res.send({ data: card }))
     .catch((err) => {
@@ -55,13 +55,13 @@ module.exports.likeCard = (req, res, next) => Card.findByIdAndUpdate(
 )
   .then((card) => {
     if (!card) {
-      next(new NotFoundError('Передан несуществующий id карточки'));
+      throw new NotFoundError('Передан несуществующий id карточки');
     }
     return res.send({ data: card });
   })
   .catch((err) => {
     if (err.name === 'CastError') {
-      next(new ValidationError('Нет такой карты'));
+      next(new ValidationError('Неверный id'));
     } else {
       next(err);
     }
@@ -75,7 +75,7 @@ module.exports.dislikeCard = (req, res, next) => Card.findByIdAndUpdate(
 )
   .then((card) => {
     if (!card) {
-      next(new NotFoundError('Передан несуществующий id карточки'));
+      throw new NotFoundError('Передан несуществующий id карточки');
     }
     return res.send({ data: card });
   })
